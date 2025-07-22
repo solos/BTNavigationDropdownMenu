@@ -1,3 +1,17 @@
+## [0.8](https://github.com/PhamBaTho/BTNavigationDropdownMenu/releases/tag/0.8) (2025-01-21)
+### Fixed
+- Fix crash caused by force unwrapping of optional values in initialization
+- Fix crash when bundle resources are not found by adding fallback image creation
+- Fix crash when `UIApplication.shared.keyWindow` is nil on iOS 13+ by adding proper fallbacks
+- Fix crash when `navigationController` is nil by adding proper nil checks
+- Fix potential array index out of bounds when accessing items array
+- Replace force unwrapping with safe optional handling throughout the codebase
+
+### Improved
+- Better error handling and graceful degradation when resources are missing
+- Support for iOS 13+ window scene architecture
+- More robust initialization with multiple fallback strategies
+
 ## [0.7](https://github.com/PhamBaTho/BTNavigationDropdownMenu/releases/tag/0.7) (16-11-2020)
 ### Fixed
 - Update deprecated index(of:) to firstIndex(of:) [(#156)](https://github.com/PhamBaTho/BTNavigationDropdownMenu/pull/156)

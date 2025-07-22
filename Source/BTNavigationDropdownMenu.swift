@@ -248,9 +248,24 @@ open class BTNavigationDropdownMenu: UIView {
         - title: A string to define title to be displayed.
         - items: The array of items to select
      */
-    public convenience init(navigationController: UINavigationController? = nil, containerView: UIView = UIApplication.shared.keyWindow!, title: String, items: [String]) {
+    public convenience init(navigationController: UINavigationController? = nil, containerView: UIView? = nil, title: String, items: [String]) {
+        let defaultContainerView: UIView
+        if let containerView = containerView {
+            defaultContainerView = containerView
+        } else if let window = UIApplication.shared.keyWindow {
+            defaultContainerView = window
+        } else {
+            // Fallback for iOS 13+ where keyWindow might be nil
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                defaultContainerView = window
+            } else {
+                // Last resort fallback
+                defaultContainerView = UIView()
+            }
+        }
 
-        self.init(navigationController: navigationController, containerView: containerView, title: BTTitle.title(title), items: items)
+        self.init(navigationController: navigationController, containerView: defaultContainerView, title: BTTitle.title(title), items: items)
     }
 
     /**
@@ -265,9 +280,16 @@ open class BTNavigationDropdownMenu: UIView {
         - title: An enum to define title to be displayed, can be a string or index of items.
         - items: The array of items to select
      */
-    public init(navigationController: UINavigationController? = nil, containerView: UIView = UIApplication.shared.keyWindow!, title: BTTitle, items: [String]) {
-        // Key window
-        guard let window = UIApplication.shared.keyWindow else {
+    public init(navigationController: UINavigationController? = nil, containerView: UIView, title: BTTitle, items: [String]) {
+        // Get the window safely
+        let window: UIWindow
+        if let keyWindow = UIApplication.shared.keyWindow {
+            window = keyWindow
+        } else if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let firstWindow = windowScene.windows.first {
+            window = firstWindow
+        } else {
+            // If we can't get a window, initialize with zero frame and return early
             super.init(frame: CGRect.zero)
             return
         }
@@ -277,6 +299,12 @@ open class BTNavigationDropdownMenu: UIView {
             self.navigationController = navigationController
         } else {
             self.navigationController = window.rootViewController?.topMostViewController?.navigationController
+        }
+        
+        // Ensure we have a navigation controller
+        guard self.navigationController != nil else {
+            super.init(frame: CGRect.zero)
+            return
         }
 
         // Get titleSize
@@ -297,7 +325,8 @@ open class BTNavigationDropdownMenu: UIView {
         titleSize = (titleToDisplay as NSString).size(withAttributes: [NSAttributedString.Key.font: self.configuration.navigationBarTitleFont])
 
         // Set frame
-        let frame = CGRect(x: 0, y: 0, width: titleSize.width + (self.configuration.arrowPadding + self.configuration.arrowImage.size.width)*2, height: self.navigationController!.navigationBar.frame.height)
+        let navBarHeight = self.navigationController?.navigationBar.frame.height ?? 44.0
+        let frame = CGRect(x: 0, y: 0, width: titleSize.width + (self.configuration.arrowPadding + self.configuration.arrowImage.size.width)*2, height: navBarHeight)
 
         super.init(frame:frame)
 
@@ -348,8 +377,8 @@ open class BTNavigationDropdownMenu: UIView {
             guard let selfie = self else {
                 return
             }
-            selfie.didSelectItemAtIndexHandler!(indexPath)
-            if selfie.shouldChangeTitleText! {
+            selfie.didSelectItemAtIndexHandler?(indexPath)
+            if selfie.shouldChangeTitleText == true && indexPath < selfie.tableView.items.count {
                 selfie.setMenuTitle("\(selfie.tableView.items[indexPath])")
             }
             self?.hideMenu()
@@ -383,7 +412,12 @@ open class BTNavigationDropdownMenu: UIView {
         self.menuTitle.textColor = self.configuration.menuTitleColor
         self.menuArrow.sizeToFit()
         self.menuArrow.center = CGPoint(x: self.menuTitle.frame.maxX + self.configuration.arrowPadding, y: self.frame.size.height/2)
-        self.menuWrapper.frame.origin.y = self.navigationController!.navigationBar.frame.maxY
+        
+        // Safely access navigation controller
+        if let navigationController = self.navigationController {
+            self.menuWrapper.frame.origin.y = navigationController.navigationBar.frame.maxY
+        }
+        
         self.tableView.reloadData()
     }
 
@@ -418,7 +452,7 @@ open class BTNavigationDropdownMenu: UIView {
         self.tableView.selectedIndexPath = index
         self.tableView.reloadData()
 
-        if self.shouldChangeTitleText! {
+        if self.shouldChangeTitleText == true && index < self.tableView.items.count {
             self.setMenuTitle("\(self.tableView.items[index])")
         }
     }
@@ -433,7 +467,9 @@ open class BTNavigationDropdownMenu: UIView {
     }
 
     func showMenu() {
-        self.menuWrapper.frame.origin.y = self.navigationController!.navigationBar.frame.maxY
+        if let navigationController = self.navigationController {
+            self.menuWrapper.frame.origin.y = navigationController.navigationBar.frame.maxY
+        }
 
         self.isShown = true
 

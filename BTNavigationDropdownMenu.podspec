@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BTNavigationDropdownMenu"
-  s.version      = "0.7"
+  s.version      = "0.8"
   s.summary      = "The elegent navigation dropdown menu"
   s.description  = "The elegant yet functional dropdown menu, written in Swift, appears underneath the navigation bar to display a list of defined items when a user clicks on the navigation title."
   s.homepage     = "https://github.com/PhamBaTho/BTNavigationDropdownMenu"

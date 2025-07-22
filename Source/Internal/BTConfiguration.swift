@@ -48,7 +48,7 @@ final class BTConfiguration {
         // Path for image
         let bundle = Bundle(for: BTConfiguration.self)
         let url = bundle.url(forResource: "BTNavigationDropdownMenu", withExtension: "bundle")
-        let imageBundle = Bundle(url: url!)
+        let imageBundle = url != nil ? Bundle(url: url!) : nil
         let checkMarkImagePath = imageBundle?.path(forResource: "checkmark_icon", ofType: "png")
         let arrowImagePath = imageBundle?.path(forResource: "arrow_down_icon", ofType: "png")
 
@@ -64,13 +64,65 @@ final class BTConfiguration {
         self.navigationBarTitleFont = UIFont.systemFont(ofSize: 17, weight: .bold)
         self.cellTextLabelAlignment = NSTextAlignment.left
         self.cellSelectionColor = UIColor.lightGray
-        self.checkMarkImage = UIImage(contentsOfFile: checkMarkImagePath!)
+        
+        // Safely load images with fallbacks
+        if let checkMarkImagePath = checkMarkImagePath {
+            self.checkMarkImage = UIImage(contentsOfFile: checkMarkImagePath)
+        } else {
+            // Create a simple checkmark image as fallback
+            self.checkMarkImage = createFallbackCheckmarkImage()
+        }
+        
+        if let arrowImagePath = arrowImagePath {
+            self.arrowImage = UIImage(contentsOfFile: arrowImagePath)
+        } else {
+            // Create a simple arrow image as fallback
+            self.arrowImage = createFallbackArrowImage()
+        }
+        
         self.shouldKeepSelectedCellColor = false
         self.animationDuration = 0.5
-        self.arrowImage = UIImage(contentsOfFile: arrowImagePath!)
         self.arrowPadding = 15
         self.maskBackgroundColor = UIColor.black
         self.maskBackgroundOpacity = 0.3
         self.shouldChangeTitleText = true
+    }
+    
+    // MARK: - Fallback Image Creation
+    
+    private func createFallbackCheckmarkImage() -> UIImage {
+        let size = CGSize(width: 20, height: 20)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        defer { UIGraphicsEndImageContext() }
+        
+        let context = UIGraphicsGetCurrentContext()
+        context?.setStrokeColor(UIColor.darkGray.cgColor)
+        context?.setLineWidth(2.0)
+        
+        // Draw checkmark
+        context?.move(to: CGPoint(x: 4, y: 10))
+        context?.addLine(to: CGPoint(x: 8, y: 14))
+        context?.addLine(to: CGPoint(x: 16, y: 6))
+        context?.strokePath()
+        
+        return UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
+    }
+    
+    private func createFallbackArrowImage() -> UIImage {
+        let size = CGSize(width: 12, height: 12)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        defer { UIGraphicsEndImageContext() }
+        
+        let context = UIGraphicsGetCurrentContext()
+        context?.setStrokeColor(UIColor.darkGray.cgColor)
+        context?.setLineWidth(2.0)
+        
+        // Draw arrow
+        context?.move(to: CGPoint(x: 2, y: 4))
+        context?.addLine(to: CGPoint(x: 6, y: 8))
+        context?.addLine(to: CGPoint(x: 10, y: 4))
+        context?.strokePath()
+        
+        return UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
     }
 }

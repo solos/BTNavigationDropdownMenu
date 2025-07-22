@@ -15,6 +15,10 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Test the fixed initialization
+        testSafeInitialization()
+        
         let items = ["Most Popular", "Latest", "Trending", "Nearest", "Top Picks"]
         self.selectedCellLabel.text = items.first
         self.navigationController?.navigationBar.isTranslucent = false
@@ -46,5 +50,27 @@ class ViewController: UIViewController {
         }
         
         self.navigationItem.titleView = menuView
+    }
+    
+    // MARK: - Test Methods
+    
+    private func testSafeInitialization() {
+        let items = ["Most Popular", "Latest", "Trending", "Nearest", "Top Picks"]
+        
+        // Test 1: Safe initialization with nil navigationController
+        let menuView1 = BTNavigationDropdownMenu(navigationController: nil, containerView: self.view, title: BTTitle.title("Test Menu"), items: items)
+        print("Test 1 passed: Safe initialization with nil navigationController")
+        
+        // Test 2: Safe initialization with nil containerView (should use fallback)
+        let menuView2 = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: nil, title: BTTitle.title("Test Menu"), items: items)
+        print("Test 2 passed: Safe initialization with nil containerView")
+        
+        // Test 3: Safe initialization with index
+        let menuView3 = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.view, title: BTTitle.index(2), items: items)
+        print("Test 3 passed: Safe initialization with index")
+        
+        // Test 4: Test with empty items array
+        let menuView4 = BTNavigationDropdownMenu(navigationController: self.navigationController, containerView: self.view, title: BTTitle.title("Empty Menu"), items: [])
+        print("Test 4 passed: Safe initialization with empty items array")
     }
 }
